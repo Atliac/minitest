@@ -1,0 +1,3 @@
+﻿add_executable(pri_impl_minitest_discover_tests_routine "main.cpp")
+
+target_link_libraries(pri_impl_minitest_discover_tests_routine PRIVATE minitest)

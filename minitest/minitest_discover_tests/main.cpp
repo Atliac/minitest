@@ -17,65 +17,62 @@ using namespace std;
 #endif // WIN32
 namespace
 {
-auto get_target_output(string_view executable)
+using minitest::pri_impl::guid;
+filesystem::path executable_path;
+
+auto get_target_output()
 {
     std::array<char, 128> buffer{};
     std::string result;
-    auto pipe = popen(format("{} {}", executable, minitest::pri_impl::flag_pri_impl_list_test_cases).c_str(), "r");
-    if (!pipe) throw std::runtime_error(format("failed to run {}! #1", executable));
+    auto pipe = popen(
+        format("{} {}", executable_path.string(), minitest::pri_impl::flag_pri_impl_list_test_cases).c_str(), "r");
+    if (!pipe) throw std::runtime_error(format("failed to run {}! #1", executable_path.string()));
     while (fgets(buffer.data(), 128, pipe)) { result += buffer.data(); }
     if (!feof(pipe))
     {
         pclose(pipe);
         throw std::runtime_error("failed to read the output of the command!");
     }
-    if (pclose(pipe)) { throw std::runtime_error(format("failed to run {}! #2", executable)); }
+    if (pclose(pipe)) { throw std::runtime_error(format("failed to run {}! #2", executable_path.string())); }
 
     return result;
 }
 
-using minitest::pri_impl::guid;
-
-char *placeholder = nullptr;
-
-// update *ctest_config_file* to include *ctest_tests_file*
-// return true if *ctest_config_file* is updated, false otherwise.
-// the file is updated if it contains *placeholder*
-auto update_ctest_config_file(filesystem::path ctest_config_file, string_view ctest_tests_file)
+auto discover_tests()
 {
-    ifstream ctest_config_file_in(ctest_config_file);
-    if (!ctest_config_file_in)
+    const auto output = get_target_output();
+    string result;
+    auto line_not_guid = [](auto &&line) { return line != guid; };
+    // parse lines between two *guid* lines
+    // line format: "index:test_case_name(file_path:line_number)"
+    regex reg(R"regex(([0-9]+):(.+)\((.+):(.+)\))regex");
+    cmatch match;
+    for (auto &&line : output | std::views::split('\n') |
+                           std::views::transform([](auto &&range) { return string_view(range.begin(), range.end()); }) |
+                           std::views::drop_while(line_not_guid) | std::views::drop(1) |
+                           std::views::take_while(line_not_guid) |
+                           std::views::filter([](auto &&line) { return !line.empty(); }))
     {
-        throw runtime_error(format("Failed to open file {0}!", filesystem::absolute(ctest_config_file).string()));
-    }
-    string ctest_config_file_content;
-    bool found_placeholder = false;
-    for (string line; getline(ctest_config_file_in, line);)
-    {
-        if (line.find(placeholder) == string::npos)
+        if (!regex_search(line.data(), line.data() + line.size(), match, reg))
         {
-            ctest_config_file_content += line;
-            ctest_config_file_content += '\n';
+            throw runtime_error(format("Failed to parse the content: {0}", line));
         }
-        else { found_placeholder = true; }
-    }
-    ctest_config_file_in.close();
+        auto test_case_index = match[1].str();
+        auto test_case_name = match[2].str();
+        auto file_path = match[3].str();
+        auto line_number = match[4].str();
 
-    if (found_placeholder)
-    {
-        ctest_config_file_content +=
-            format("include(\"{0}\")\n", filesystem::absolute(ctest_tests_file).generic_string());
-    }
-    else { return false; }
+        replace(file_path.begin(), file_path.end(), '\\', '/');
 
-    ofstream ctest_config_file_out(ctest_config_file);
-    if (!ctest_config_file_out)
-    {
-        throw runtime_error(format("Failed to open file {0}!", filesystem::absolute(ctest_config_file).string()));
+        result += format(R"(add_test([====[{0}]====] "{1}" {2} "{3}"))", test_case_name,
+            executable_path.generic_string(), minitest::pri_impl::flag_pri_impl_run_nth_test_case, test_case_index);
+        result += '\n';
+        result += format(
+            R"(set_tests_properties([====[{0}]====] PROPERTIES _BACKTRACE_TRIPLES "{1};{2};minitest_discover_tests"))",
+            test_case_name, file_path, line_number);
+        result += '\n';
     }
-    ctest_config_file_out << ctest_config_file_content;
-    ctest_config_file_out.close();
-    return true;
+    return result;
 }
 
 } // namespace
@@ -84,76 +81,90 @@ int main(int argc, char *argv[])
 {
     try
     {
-        assert(argc == 5);
-        assert(!strcmp(argv[2], guid));
-        filesystem::path CMake_binary_dir = argv[3];
-        placeholder = argv[4];
-        const auto target_executable = argv[1];
-        string target_executable_stem = filesystem::path(target_executable).stem().string();
-        // the name the file that contains the test cases
-        string ctest_tests_file = format("{}_ctest_tests_{}.cmake", target_executable_stem, guid);
-        // change the current working directory to the directory of the target executable.
-        filesystem::current_path(filesystem::path(target_executable).parent_path());
-
-        const auto output = get_target_output(target_executable);
-        ofstream ctest_tests_file_out(ctest_tests_file);
-        bool found_test_case = false;
-        auto line_not_guid = [](auto &&line) { return line != guid; };
-        // parse lines between two *guid* lines
-        // line format: "index:test_case_name(file_path:line_number)"
-        regex reg(R"regex(([0-9]+):(.+)\((.+):(.+)\))regex");
-        cmatch match;
-        for (auto &&line :
-            output | std::views::split('\n') |
-                std::views::transform([](auto &&range) { return string_view(range.begin(), range.end()); }) |
-                std::views::drop_while(line_not_guid) | std::views::drop(1) | std::views::take_while(line_not_guid) |
-                std::views::filter([](auto &&line) { return !line.empty(); }))
+        // argv[1]: the full path of the target executable
+        // argv[2]: the full path of the CMake binary directory
+        if (3 != argc)
         {
-            if (!regex_search(line.data(), line.data() + line.size(), match, reg))
+            cout << "minitest_discover_tests failed! Invalid number of arguments!" << endl;
+            return EXIT_FAILURE;
+        }
+        executable_path = argv[1];
+        filesystem::path CMake_binary_dir = argv[2];
+        filesystem::path config_file_path = CMake_binary_dir / "CTestTestfile.cmake";
+        if (!filesystem::exists(config_file_path))
+        {
+            throw runtime_error(format("{} does not exist!", config_file_path.string()));
+        }
+
+        auto tests = discover_tests();
+        if (tests.empty())
+        {
+            cout << "minitest_discover_tests: no tests found for " << executable_path << endl;
+            return EXIT_SUCCESS;
+        }
+
+        // first, remove the old data
+        // the old data is between the lines "# executable_path.generic_string() guid" and "guid"
+        string content;
+        bool found = false;
+        bool found_old_data = false;
+        string line;
+        ifstream file(config_file_path);
+        if (!file.is_open()) { throw runtime_error(format("Failed to open {}!", config_file_path.string())); }
+        while (getline(file, line))
+        {
+            if (line == format("# {} {}", executable_path.generic_string(), guid))
             {
-                throw runtime_error(format("Failed to parse the content: {0}", line));
+                found = true;
+                found_old_data = true;
+                continue;
             }
-            auto test_case_index = match[1].str();
-            auto test_case_name = match[2].str();
-            auto file_path = match[3].str();
-            auto line_number = match[4].str();
+            if (found && line == format("# {}", guid))
+            {
+                found = false;
+                continue;
+            }
+            if (!found) { content += line + '\n'; }
+        }
+        file.close();
+        // then, append the new data
+        content += format("# {} {}\n", executable_path.generic_string(), guid);
+        content += tests;
+        content += format("# {}\n", guid);
+        ofstream out(config_file_path);
+        if (!out.is_open()) { throw runtime_error(format("Failed to open {} to write!", config_file_path.string())); }
+        out << content;
+        out.close();
 
-            replace(file_path.begin(), file_path.end(), '\\', '/');
+        if (found_old_data) { return EXIT_SUCCESS; }
 
-            ctest_tests_file_out << format(R"(add_test([====[{0}]====] "{1}" {2} "{3}"))", test_case_name,
-                                        target_executable, minitest::pri_impl::flag_pri_impl_run_nth_test_case,
-                                        test_case_index)
-                                 << endl;
-            ctest_tests_file_out
-                << format(
-                       R"(set_tests_properties([====[{0}]====] PROPERTIES _BACKTRACE_TRIPLES "{1};{2};minitest_discover_tests"))",
-                       test_case_name, file_path, line_number)
-                << endl;
-            found_test_case = true;
-        }
-        if (!found_test_case)
-        {
-            cout << "minitest_discover_tests: no test case found in " << target_executable << endl;
-            ctest_tests_file_out << format(R"(add_test("{}_NO_TEST_CASE" "{}"))",
-                                        filesystem::path(target_executable).filename().string(), guid)
-                                 << endl;
-        }
-        ctest_tests_file_out.close();
-        if (!ctest_tests_file_out)
-        {
-            throw runtime_error(
-                format("Failed to write to file {0}!", filesystem::absolute(ctest_tests_file).string()));
-        }
-        // update_ctest_config_file(ctest_tests_file);
-        //  iterate over all *CTestTestfile.cmake* files in *CMake_binary_dir* or in its subdirectories
-        //  and update the first *CTestTestfile.cmake* file that contains *placeholder*
+        // iterate over the cmake binary directory and its subdirectories, and remove all the lines that
+        // contain `guid`_NOT_BUILT in the CTestTestfile.cmake files.
+        auto mark = format("{}_NOT_BUILT", guid);
         for (auto &p : filesystem::recursive_directory_iterator(CMake_binary_dir))
         {
             if (p.is_regular_file() && p.path().filename() == "CTestTestfile.cmake")
             {
-                if (update_ctest_config_file(p, ctest_tests_file))
+                string content;
+                string line;
+                ifstream file(p.path());
+                bool found = false;
+                if (!file.is_open()) { throw runtime_error(format("Failed to open {}!", p.path().string())); }
+                while (getline(file, line))
                 {
-                    break;
+                    if (line.find(mark) == string::npos) { content += line + '\n'; }
+                    else { found = true; }
+                }
+                file.close();
+                if (found)
+                {
+                    ofstream out(p.path());
+                    if (!out.is_open())
+                    {
+                        throw runtime_error(format("Failed to open {} to write!", p.path().string()));
+                    }
+                    out << content;
+                    out.close();
                 }
             }
         }

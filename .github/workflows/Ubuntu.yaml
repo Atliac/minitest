@@ -1,7 +1,4 @@
-on:
- push:
-  branches:
-  - master
+on: [push]
 jobs:
  Ubuntu_Debug:
   runs-on: ubuntu-latest

@@ -277,7 +277,7 @@ See [Hint Files](https://go.microsoft.com/fwlink/?linkid=865984) for more inform
 ## Known issues
 
 1. If a source file of a library contains only test cases or although it contains other codes but none of them are used outside of the file, the linker may optimize the file out. To avoid this, add a dummy function and call it outside of the file.
-1. When using the Test Explorer in Visual Studio, you may sometimes find the list of test cases is not matching the actual test cases. The workaround is:
-    1. Reconfigure the CMake project, then rebuild the project. Merely rebuild doesn't work.
+1. When using the Test Explorer in Visual Studio, you may sometimes find the list of test cases is not matching the actual test cases. This is a known issue with the Test Explorer. It mostly happens when you delete a test case. Workarounds:
+    1. Reconfigure the CMake project, then rebuild the project.
     1. Use the **CTest** directly.
     1. Use the flags that the **minitest** library provides to run the test cases.

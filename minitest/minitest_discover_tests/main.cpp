@@ -36,52 +36,37 @@ auto get_target_output(string_view executable)
 
 using minitest::pri_impl::guid;
 
-// scan the current directory and its parent directories for *ctest_config_file*
-auto get_ctest_config_file_path()
-{
-    const char* ctest_config_file = "CTestTestfile.cmake";
-    auto current_path = filesystem::current_path();
-    while (true)
-    {
-        auto ctest_config_file_path = current_path / ctest_config_file;
-        if (filesystem::exists(ctest_config_file_path)) { return ctest_config_file_path; }
-        if (current_path.has_parent_path())
-        {
-            current_path = current_path.parent_path();
-        }
-        else
-        {
-            throw runtime_error(format("Failed to find file {0}!", ctest_config_file));
-        }
-    }
-}
+char *placeholder = nullptr;
 
-void update_ctest_config_file(string_view ctest_tests_file)
+// update *ctest_config_file* to include *ctest_tests_file*
+// return true if *ctest_config_file* is updated, false otherwise.
+// the file is updated if it contains *placeholder*
+auto update_ctest_config_file(filesystem::path ctest_config_file, string_view ctest_tests_file)
 {
-    auto ctest_config_file = get_ctest_config_file_path();
-    // remove lines contain *guid* from *ctest_config_file*
     ifstream ctest_config_file_in(ctest_config_file);
-    if (!ctest_config_file_in) 
+    if (!ctest_config_file_in)
     {
         throw runtime_error(format("Failed to open file {0}!", filesystem::absolute(ctest_config_file).string()));
     }
     string ctest_config_file_content;
-    bool found_guid = false;
+    bool found_placeholder = false;
     for (string line; getline(ctest_config_file_in, line);)
     {
-        if (line.find(guid) == string::npos)
+        if (line.find(placeholder) == string::npos)
         {
             ctest_config_file_content += line;
             ctest_config_file_content += '\n';
         }
-        else { found_guid = true; }
+        else { found_placeholder = true; }
     }
     ctest_config_file_in.close();
 
-    if (found_guid)
+    if (found_placeholder)
     {
-        ctest_config_file_content += format("include(\"{0}\")\n", filesystem::absolute(ctest_tests_file).generic_string());
+        ctest_config_file_content +=
+            format("include(\"{0}\")\n", filesystem::absolute(ctest_tests_file).generic_string());
     }
+    else { return false; }
 
     ofstream ctest_config_file_out(ctest_config_file);
     if (!ctest_config_file_out)
@@ -90,17 +75,22 @@ void update_ctest_config_file(string_view ctest_tests_file)
     }
     ctest_config_file_out << ctest_config_file_content;
     ctest_config_file_out.close();
+    return true;
 }
+
 } // namespace
 
 int main(int argc, char *argv[])
 {
     try
     {
-        assert(argc == 3);
+        assert(argc == 5);
         assert(!strcmp(argv[2], guid));
+        filesystem::path CMake_binary_dir = argv[3];
+        placeholder = argv[4];
         const auto target_executable = argv[1];
         string target_executable_stem = filesystem::path(target_executable).stem().string();
+        // the name the file that contains the test cases
         string ctest_tests_file = format("{}_ctest_tests_{}.cmake", target_executable_stem, guid);
         // change the current working directory to the directory of the target executable.
         filesystem::current_path(filesystem::path(target_executable).parent_path());
@@ -154,7 +144,19 @@ int main(int argc, char *argv[])
             throw runtime_error(
                 format("Failed to write to file {0}!", filesystem::absolute(ctest_tests_file).string()));
         }
-        update_ctest_config_file(ctest_tests_file);
+        // update_ctest_config_file(ctest_tests_file);
+        //  iterate over all *CTestTestfile.cmake* files in *CMake_binary_dir* or in its subdirectories
+        //  and update the first *CTestTestfile.cmake* file that contains *placeholder*
+        for (auto &p : filesystem::recursive_directory_iterator(CMake_binary_dir))
+        {
+            if (p.is_regular_file() && p.path().filename() == "CTestTestfile.cmake")
+            {
+                if (update_ctest_config_file(p, ctest_tests_file))
+                {
+                    break;
+                }
+            }
+        }
     }
     catch (const std::exception &e)
     {

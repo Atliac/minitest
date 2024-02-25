@@ -33,9 +33,10 @@ if(WIN32)
     )
 endif(WIN32)
 if(BUILD_TESTING)
+set(placeholder ${target}_NOT_BUILT_${guid})
 add_custom_command(TARGET ${target} POST_BUILD
-    COMMAND pri_impl_minitest_discover_tests_routine "$<TARGET_FILE:${target}>" ${guid}
+    COMMAND pri_impl_minitest_discover_tests_routine "$<TARGET_FILE:${target}>" ${guid} ${CMAKE_BINARY_DIR} ${placeholder}
     COMMENT "Discovering tests for ${target}")
-add_test(${target}_NOT_BUILT_${guid} ${target}_NOT_BUILT)
+add_test(${placeholder} ${target}_NOT_BUILT)
 endif(BUILD_TESTING)
 endfunction(minitest_discover_tests)

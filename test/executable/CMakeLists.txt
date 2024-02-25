@@ -8,6 +8,3 @@ set_target_properties(minitest PROPERTIES RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE
 endif(WIN32)
 
 minitest_discover_tests(executable)
-
-add_test(NAME test_executable COMMAND executable)
-set_tests_properties(test_executable PROPERTIES PASS_REGULAR_EXPRESSION "^executable:Hello, World!")

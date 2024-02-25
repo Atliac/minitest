@@ -11,4 +11,4 @@ TEST_CASE("Win32")
 {
     EXPECT_TRUE(true);
     EXPECT_FALSE(false);
-}
+} 

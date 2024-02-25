@@ -10,6 +10,10 @@
 * CMake(optional, recommended)
 * vcpkg(optional, recommended)
 
+## Tested platforms
+
+Ubuntu g++13, Windows MSVC
+
 ![Ubuntu g++13](https://github.com/Atliac/minitest/actions/workflows/Ubuntu.yaml/badge.svg)
 
 ![Windows MSVC](https://github.com/Atliac/minitest/actions/workflows/Windows.yaml/badge.svg)

@@ -33,10 +33,32 @@ auto get_target_output(string_view executable)
 
     return result;
 }
+
 using minitest::pri_impl::guid;
-const char *ctest_config_file = "CTestTestfile.cmake";
+
+// scan the current directory and its parent directories for *ctest_config_file*
+auto get_ctest_config_file_path()
+{
+    const char* ctest_config_file = "CTestTestfile.cmake";
+    auto current_path = filesystem::current_path();
+    while (true)
+    {
+        auto ctest_config_file_path = current_path / ctest_config_file;
+        if (filesystem::exists(ctest_config_file_path)) { return ctest_config_file_path; }
+        if (current_path.has_parent_path())
+        {
+            current_path = current_path.parent_path();
+        }
+        else
+        {
+            throw runtime_error(format("Failed to find file {0}!", ctest_config_file));
+        }
+    }
+}
+
 void update_ctest_config_file(string_view ctest_tests_file)
 {
+    auto ctest_config_file = get_ctest_config_file_path();
     // remove lines contain *guid* from *ctest_config_file*
     ifstream ctest_config_file_in(ctest_config_file);
     if (!ctest_config_file_in)
@@ -56,7 +78,10 @@ void update_ctest_config_file(string_view ctest_tests_file)
     }
     ctest_config_file_in.close();
 
-    if (found_guid) { ctest_config_file_content += format("include(\"{0}\")\n", ctest_tests_file); }
+    if (found_guid)
+    {
+        ctest_config_file_content += format("include(\"{0}\")\n", filesystem::absolute(ctest_tests_file).string());
+    }
 
     ofstream ctest_config_file_out(ctest_config_file);
     if (!ctest_config_file_out)
@@ -67,6 +92,7 @@ void update_ctest_config_file(string_view ctest_tests_file)
     ctest_config_file_out.close();
 }
 } // namespace
+
 int main(int argc, char *argv[])
 {
     try

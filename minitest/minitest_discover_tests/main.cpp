@@ -61,7 +61,7 @@ void update_ctest_config_file(string_view ctest_tests_file)
     auto ctest_config_file = get_ctest_config_file_path();
     // remove lines contain *guid* from *ctest_config_file*
     ifstream ctest_config_file_in(ctest_config_file);
-    if (!ctest_config_file_in)
+    if (!ctest_config_file_in) 
     {
         throw runtime_error(format("Failed to open file {0}!", filesystem::absolute(ctest_config_file).string()));
     }
@@ -80,7 +80,7 @@ void update_ctest_config_file(string_view ctest_tests_file)
 
     if (found_guid)
     {
-        ctest_config_file_content += format("include(\"{0}\")\n", filesystem::absolute(ctest_tests_file).string());
+        ctest_config_file_content += format("include(\"{0}\")\n", filesystem::absolute(ctest_tests_file).generic_string());
     }
 
     ofstream ctest_config_file_out(ctest_config_file);

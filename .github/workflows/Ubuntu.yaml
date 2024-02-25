@@ -1,0 +1,30 @@
+on:
+ push:
+  branches:
+  - master
+jobs:
+ Ubuntu_Debug:
+  runs-on: ubuntu-latest
+  steps:
+   - uses: actions/checkout@v4.1.1
+   - name: Install Ninja
+     run: sudo apt-get install ninja-build
+   - name: Configure with CMake
+     run: cmake -B build --preset linux-debug
+   - name: Build with CMake
+     run: cmake --build build
+   - name: Test with CTest
+     run: ctest --test-dir build --output-on-failure
+
+ Ubuntu_Release:
+  runs-on: ubuntu-latest
+  steps:
+   - uses: actions/checkout@v4.1.1
+   - name: Install Ninja
+     run: sudo apt-get install ninja-build
+   - name: Configure with CMake
+     run: cmake -B build --preset linux-release
+   - name: Build with CMake
+     run: cmake --build build
+   - name: Test with CTest
+     run: ctest --test-dir build --output-on-failure

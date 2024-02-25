@@ -62,7 +62,9 @@
             "inherits": "linux-base",
             "cacheVariables":
             {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_C_COMPILER": "gcc-13",
+                "CMAKE_CXX_COMPILER": "g++-13"
             }
         },
         {

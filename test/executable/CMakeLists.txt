@@ -9,5 +9,5 @@ endif(WIN32)
 
 minitest_discover_tests(executable)
 
-add_test(NAME test_executable COMMAND executable)
+add_test(NAME test_executable COMMAND $<TARGET_FILE:executable>)
 set_tests_properties(test_executable PROPERTIES PASS_REGULAR_EXPRESSION "^executable:Hello, World!")

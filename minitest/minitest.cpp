@@ -177,30 +177,26 @@ int minitest::pri_impl::run_test(int argc, const char *const *argv)
         return MINITEST_FAILURE;
     }
 
-    regex reg_help(R"regex(--help|/help|-h|/h|-\?|/\?)regex");
     for (int i = 1; i < argc; ++i)
     {
-        if (regex_search(argv[i], reg_help))
+        if ("--minitest-help"sv == argv[i])
         {
             cout << format(R"(minitest: {} has {} test case{}.
 Usage:
---help, /help, -h, /h, -?, /?
-    Print this help message, then continue the program.
-    If no argument that listed below is specified, the program continues to run.
-    The program exits after any of the following specified operation is done.
-    The program runs in non-silent mode with or without any the flags below.
+--minitest-help
+    Print this help message
 {}
     List all test cases.
 {} <test_case_name>
-    Run the specified test case.
+    Run the specified test case in non-silent mode.
 {} <n>
-    Run the nth test case.
+    Run the nth test case in non-silent mode.
             )",
                         filesystem::path(argv[0]).filename().string(), registered_test_cases.size(),
                         registered_test_cases.size() > 1 ? "s" : "", flag_list_test_cases, flag_run_test_case,
                         flag_run_nth_test_case)
                  << endl;
-            continue;
+            return MINITEST_SUCCESS;
         }
 
         if (!strcmp(argv[i], flag_list_test_cases))

@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 }
 ```
 
-Build and run the test, pass `--help` flag to see the help information.
+Build and run the test, pass `--minitest-help` flag to see the help information.
 
 ### Installation
 
@@ -209,9 +209,9 @@ Test cases run directly are in non-silent mode.
 
 ## MINITEST_RUN_TEST(argc, argv)
 
-The `MINITEST_RUN_TEST` macro is used to handle test-related command line arguments and run test cases. It can only be used in the `main` function of an executable.
+The `MINITEST_RUN_TEST` macro is used to handle test-related command line arguments and run test cases. It can only be used in the `main` function of an executable. It is recommended to put the `MINITEST_RUN_TEST` macro at the beginning of the `main` function.
 
-Passing the `--help` flag to the executable will print the help information.
+Passing the `--minitest-help` flag to the executable will print the help information.
 
 ```cpp
 int main(int argc, char *argv[])
@@ -243,7 +243,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return 0;
 }
 ```
-Run the test with the `--help` flag to see the help information: `target.exe --help | more`;
+Run the test with the `--minitest-help` flag to see the help information: `target.exe --minitest-help | more`;
 
 ## Compile-time configurations
 

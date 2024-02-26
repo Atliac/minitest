@@ -1,10 +1,10 @@
 ﻿// ==========================================================================
 // minitest - a minimal testing framework for C++
-// 
+//
 // Copyright (c) 2024 Atliac
 // Distributed under the MIT Software License
 // See accompanying file LICENSE.txt or copy at https://opensource.org/licenses/MIT
-// 
+//
 // The documentation can be found at the library's GitHub repository:
 // https://github.com/Atliac/minitest/blob/main/README.md
 // ==========================================================================
@@ -49,6 +49,20 @@ auto &get_registered_test_cases()
     return registered_test_cases;
 }
 
+auto elapsed_time_str(chrono::steady_clock::duration elapsed_time)
+{
+    chrono::duration<float> s = elapsed_time;
+    auto hours = chrono::duration_cast<chrono::hours>(elapsed_time);
+    auto minutes = chrono::duration_cast<chrono::minutes>(elapsed_time % chrono::hours(1));
+    auto seconds = chrono::duration_cast<chrono::seconds>(elapsed_time % chrono::minutes(1));
+    auto milliseconds = chrono::duration_cast<chrono::milliseconds>(elapsed_time % chrono::seconds(1));
+    return format("{}({}{}{}{}ms)", s > 1ms ? format("{:.3f}s", s.count()) : format("{:.3f}ms", s.count() * 1000)
+
+                                        ,
+        hours.count() ? format("{}h:", hours.count()) : "", minutes.count() ? format("{}m:", minutes.count()) : "",
+        seconds.count() ? format("{}s:", seconds.count()) : "", milliseconds.count());
+}
+
 auto run_registered_test_case(string_view test_case_name)
 {
     auto &registered_test_cases = get_registered_test_cases();
@@ -59,9 +73,7 @@ auto run_registered_test_case(string_view test_case_name)
         registered_test_cases[test_case_name].test_case_func();
         auto end_time = chrono::high_resolution_clock::now();
         check_expectation_failure();
-        cout << format("{} passed, time elapsed: {} ms", test_case_name,
-                    chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count())
-             << endl;
+        cout << format("{} passed, time elapsed: {}", test_case_name, elapsed_time_str(end_time - start_time)) << endl;
         return;
     }
     cout << format("Error: failed to find test case {}", test_case_name) << endl;
@@ -123,9 +135,7 @@ auto run_nth_test_case(size_t nth_test_case_index)
     it->second.test_case_func();
     auto end_time = chrono::high_resolution_clock::now();
     check_expectation_failure();
-    cout << format("{} passed, time elapsed: {} ms", it->first,
-                chrono::duration_cast<chrono::milliseconds>(end_time - start_time).count())
-         << endl;
+    cout << format("{} passed, time elapsed: {}", it->first, elapsed_time_str(end_time - start_time)) << endl;
 }
 
 // call `f` with `args` to run the test case.

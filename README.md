@@ -259,6 +259,12 @@ For CMake projects, if the `MINITEST_CONFIG_DISABLE` is used to disable the `MII
 
 Define the macro `MINITEST_CONFIG_NO_SHORT_NAMES` to remove all macros from `minitest` that don't start with `MINITEST_`. This is useful when you want to avoid name conflicts.
 
+## minitest_discover_tests(CMake function)
+
+The `minitest_discover_tests` is an all-in-one function. It is used to add the `minitest` to any type of target and to discover test cases to configure the [CTest](https://cmake.org/cmake/help/latest/manual/ctest.1.html). Directly call the `target_link_libraries` is not required.`
+
+The test cases are discovered by running the target if the target is an executable. Unexpected behavior would occur if the `main()` function of the target doesn't call the `MINITEST_RUN_TEST` or `MINITEST_WIN32_RUN_TEST` macro. The `minitest_discover_tests` function will not try to discover test cases if the `BUILD_TESTING` option is not set or is set to `OFF`.
+
 ## Visual Studio IDE integration(optional)
 
 Copy the [cpp.hint](cpp.hint) file from the [minitest](minitest) directory to the root directory of your project, to enable the Visual Studio integration, such as code navigation and other features.
@@ -277,7 +283,4 @@ See [Hint Files](https://go.microsoft.com/fwlink/?linkid=865984) for more inform
 ## Known issues
 
 1. If a source file of a library contains only test cases or although it contains other codes but none of them are used outside of the file, the linker may optimize the file out. To avoid this, add a dummy function and call it outside of the file.
-1. When using the Test Explorer in Visual Studio, you may sometimes find the list of test cases is not matching the actual test cases. This is a known issue with the Test Explorer. It mostly happens when you delete a test case. Workarounds:
-    1. Reconfigure the CMake project, then rebuild the project.
-    1. Use the **CTest** directly.
-    1. Use the flags that the **minitest** library provides to run the test cases.
+1. When using the Test Explorer of Visual Studio, you may sometimes find the list of test cases is not matching the actual test cases. This is a known issue with the Test Explorer. It mostly happens when you delete a test case. Reconfigure the CMake project, then rebuild the project would fix the issue.

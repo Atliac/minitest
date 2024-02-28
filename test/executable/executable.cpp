@@ -4,6 +4,7 @@
 #include <regex>
 #include <set>
 #include <sstream>
+#include <string>
 
 // passes if the ASSERTION, expr, fails
 #define TEST_ASSERT_ASSERTION_FAILURE(expr)                                                                       \
@@ -34,29 +35,17 @@ static auto get_test_case_names()
     std::ostringstream ss;
     auto cout_buff = std::cout.rdbuf(ss.rdbuf());
     const int argc = 2;
-    const char *argv[] = {"_", minitest::pri_impl::flag_pri_impl_list_test_cases};
-    // line format: "index:test_case_name(file_path:line_number)"
-    std::regex test_case_name_regex(R"(([0-9]+):(.+)\((.+):(.+)\))");
-    std::cmatch match;
+    const char *argv[] = {"_", minitest::pri_impl::flag_list_test_cases};
     auto rt = minitest::pri_impl::run_test(argc, argv);
-    std::string result = ss.str();
+    auto result=ss.str();
     std::cout.rdbuf(cout_buff);
     ASSERT_TRUE(rt == MINITEST_SUCCESS);
-    using minitest::pri_impl::guid;
-    auto line_not_guid = [](auto &&line) { return line != guid; };
-    auto lines = result | std::views::split('\n') |
-                 std::views::transform([](auto &&range) { return std::string_view(range.begin(), range.end()); }) |
-                 std::views::drop_while(line_not_guid) | std::views::drop(1) | std::views::take_while(line_not_guid) |
-                 std::views::filter([](auto &&line) { return !line.empty(); });
-    for (auto &&line : lines)
+    std::regex re(R"(\d+:(.+)\()");
+    std::smatch match;
+    while (std::regex_search(result, match, re))
     {
-        if (!std::regex_search(line.data(), line.data() + line.size(), match, test_case_name_regex))
-        {
-            std::cout << format("Failed to parse the content: {0}", line) << std::endl;
-            FAIL();
-        }
-        auto test_case_name = match[2].str();
-        test_case_names.insert(test_case_name);
+        test_case_names.insert(match[1]);
+        result = match.suffix();
     }
     return test_case_names;
 }
@@ -90,17 +79,17 @@ TEST_CASE(test_case_name_with_special_chars_6) {}
 TEST_CASE("Assert test cases exist")
 {
     auto test_case_names = get_test_case_names();
-    ASSERT_TRUE(test_case_names.contains("static_lib.test_case_1"));
-    ASSERT_TRUE(test_case_names.contains("static_lib.test_case_2"));
-    ASSERT_TRUE(test_case_names.contains("shared_lib.test_case_1"));
-    ASSERT_TRUE(test_case_names.contains("shared_lib.test_case_2"));
+    EXPECT_TRUE(test_case_names.contains("static_lib.test_case_1"));
+    EXPECT_TRUE(test_case_names.contains("static_lib.test_case_2"));
+    EXPECT_TRUE(test_case_names.contains("shared_lib.test_case_1"));
+    EXPECT_TRUE(test_case_names.contains("shared_lib.test_case_2"));
 
-    ASSERT_TRUE(test_case_names.contains(test_case_name_with_special_chars_1));
-    ASSERT_TRUE(test_case_names.contains(test_case_name_with_special_chars_2));
-    ASSERT_TRUE(test_case_names.contains(test_case_name_with_special_chars_3));
-    ASSERT_TRUE(test_case_names.contains(test_case_name_with_special_chars_4));
-    ASSERT_TRUE(test_case_names.contains(test_case_name_with_special_chars_5));
-    ASSERT_TRUE(test_case_names.contains(test_case_name_with_special_chars_6));
+    EXPECT_TRUE(test_case_names.contains(test_case_name_with_special_chars_1));
+    EXPECT_TRUE(test_case_names.contains(test_case_name_with_special_chars_2));
+    EXPECT_TRUE(test_case_names.contains(test_case_name_with_special_chars_3));
+    EXPECT_TRUE(test_case_names.contains(test_case_name_with_special_chars_4));
+    EXPECT_TRUE(test_case_names.contains(test_case_name_with_special_chars_5));
+    EXPECT_TRUE(test_case_names.contains(test_case_name_with_special_chars_6));
 }
 
 TEST_CASE("Failure Test: ASSERT_TRUE(false)")

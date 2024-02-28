@@ -10,10 +10,12 @@
 // ==========================================================================
 
 #include "minitest.h"
+#include <cassert>
 #include <chrono>
 #include <cstring>
 #include <exception>
 #include <filesystem>
+#include <fstream>
 #include <functional>
 #include <map>
 #include <memory>
@@ -163,6 +165,69 @@ template <class F, class... Args>
     return MINITEST_FAILURE;
 }
 
+// Implement the flag_pri_impl_discover_test_cases flag.
+auto discover_test_case(filesystem::path executable_path, const string &guid, filesystem::path test_config_file)
+{
+    // read all the content of the test file
+    ifstream ifs(test_config_file);
+    if (!ifs)
+    {
+        cout << format("minitest discover test cases failed: failed to open file {}", test_config_file.string())
+             << endl;
+        return MINITEST_FAILURE;
+    }
+    string content((istreambuf_iterator<char>(ifs)), (istreambuf_iterator<char>()));
+    ifs.close();
+
+    const auto mark_line = format("# {}", guid);
+    // remove the old data
+    // remove the lines between the mark line and the next mark line
+    content = regex_replace(content, regex(format(R"(({}\n)[\s\S]*\1)", mark_line)), "");
+    // remove the lines contain **guid**
+    content = regex_replace(content, regex(format(R"((.*{}.*\n))", guid)), "");
+
+    if (get_registered_test_cases().empty())
+    {
+        cout << "minitest_discover_tests: no test cases found for " << executable_path << endl;
+    }
+    else
+    {
+        // append the new data
+        content += mark_line;
+        content += '\n';
+        int test_case_index = 0;
+        for (auto &[name, info] : get_registered_test_cases())
+        {
+
+            content += format(R"(add_test([====[{0}]====] "{1}" {2} "{3}"))", name, executable_path.generic_string(),
+                minitest::pri_impl::flag_pri_impl_run_nth_test_case, test_case_index++);
+            content += '\n';
+            string location = info.test_case_location;
+            // replace the last ':' with ';' in the location
+            auto last_colon = location.find_last_of(':');
+            assert(last_colon != string::npos);
+            location[last_colon] = ';';
+            content += format(
+                R"(set_tests_properties([====[{0}]====] PROPERTIES _BACKTRACE_TRIPLES "{1};minitest_discover_tests"))",
+                name, location);
+            content += '\n';
+        }
+        content += mark_line;
+        content += '\n';
+    }
+
+    ofstream ofs(test_config_file);
+    if (!ofs)
+    {
+        cout << format("minitest discover test cases failed: failed to open file {}", test_config_file.string())
+             << endl;
+        return MINITEST_FAILURE;
+    }
+    ofs << content;
+
+    return MINITEST_SUCCESS;
+}
+
 } // namespace
 
 void minitest::pri_impl::signal_expectation_failure() { expectation_failed = true; }
@@ -207,22 +272,6 @@ Usage:
             list_registered_test_cases();
             return MINITEST_SUCCESS;
         }
-        else if (!strcmp(argv[i], flag_pri_impl_list_test_cases))
-        {
-            if (registered_test_cases.empty())
-            {
-                cout << format("minitest: {0} has {1} test case{2}.", filesystem::path(argv[0]).filename().string(),
-                            registered_test_cases.size(), registered_test_cases.size() > 1 ? "s" : "")
-                     << endl;
-            }
-            else
-            {
-                cout << guid << endl;
-                list_registered_test_cases();
-                cout << guid << endl;
-            }
-            return MINITEST_SUCCESS;
-        }
         else if (!strcmp(argv[i], flag_run_test_case) && i + 1 < argc)
         {
             return run_test_case(run_registered_test_case, argv[i + 1]);
@@ -234,6 +283,10 @@ Usage:
         else if (!strcmp(argv[i], flag_run_nth_test_case) && i + 1 < argc)
         {
             return run_test_case(run_nth_test_case, stoul(argv[i + 1]));
+        }
+        else if (!strcmp(argv[i], flag_pri_impl_discover_test_cases) && i + 2 < argc)
+        {
+            return discover_test_case(filesystem::absolute(argv[0]), argv[i + 1], filesystem::path(argv[i + 2]));
         }
     }
 

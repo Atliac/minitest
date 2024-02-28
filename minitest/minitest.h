@@ -1,10 +1,10 @@
 ﻿// ==========================================================================
 // minitest - a minimal testing framework for C++
-// 
+//
 // Copyright (c) 2024 Atliac
 // Distributed under the MIT Software License
 // See accompanying file LICENSE.txt or copy at https://opensource.org/licenses/MIT
-// 
+//
 // The documentation can be found at the library's GitHub repository:
 // https://github.com/Atliac/minitest/blob/main/README.md
 // ==========================================================================
@@ -59,9 +59,8 @@ PRI_IMPL_MINITEST_EXPORT bool silent_mode();
 
 namespace pri_impl
 {
-const auto guid = "B06065BA2B364445A11B6E98E779BBA1";
-const auto flag_pri_impl_list_test_cases = "--minitest-pri-impl-list-test-cases";
 const auto flag_pri_impl_run_nth_test_case = "--minitest-pri-impl-run-nth-test-case";
+const auto flag_pri_impl_discover_test_cases = "--minitest-pri-impl-discover-test-cases";
 const auto flag_list_test_cases = "--minitest-list-test-cases";
 const auto flag_run_test_case = "--minitest-run-test-case";
 const auto flag_run_nth_test_case = "--minitest-run-nth-test-case";

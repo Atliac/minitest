@@ -207,6 +207,8 @@ auto discover_test_case(filesystem::path executable_path, const string &guid, fi
             auto last_colon = location.find_last_of(':');
             assert(last_colon != string::npos);
             location[last_colon] = ';';
+            // replace the '\' with '/' in the location
+            replace(location.begin(), location.end(), '\\', '/');
             content += format(
                 R"(set_tests_properties([====[{0}]====] PROPERTIES _BACKTRACE_TRIPLES "{1};minitest_discover_tests"))",
                 name, location);

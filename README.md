@@ -243,7 +243,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return 0;
 }
 ```
-Run the test with the `--minitest-help` flag to see the help information: `target.exe --minitest-help | more`;
+This macro is only available on Windows. While it can be used in a console application, it is recommended to use the `MINITEST_RUN_TEST` macro instead.
 
 ## Compile-time configurations
 

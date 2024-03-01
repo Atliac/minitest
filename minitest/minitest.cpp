@@ -21,12 +21,49 @@
 #include <memory>
 #include <regex>
 #include <string>
+#ifdef _WIN32
+#include <Windows.h>
+#include <shellapi.h>
+#endif // _WIN32
+
 using namespace std;
 
 namespace
 {
 bool expectation_failed = false;
 bool silent_mode = false;
+
+#ifdef _WIN32
+// RAII class for allocating a console for the current win32 GUI application.
+class win32_console
+{
+private:
+    bool allocated = false;
+
+public:
+    win32_console()
+    {
+        // if (AttachConsole(ATTACH_PARENT_PROCESS) || (allocated = AllocConsole()))
+        if (AllocConsole())
+        {
+            allocated = true;
+            FILE* fp;
+            assert(freopen_s(&fp, "CONOUT$", "w", stdout) == 0);
+            assert(freopen_s(&fp, "CONOUT$", "w", stderr) == 0);
+            assert(freopen_s(&fp, "CONIN$", "r", stdin) == 0);
+        }
+    }
+
+    ~win32_console()
+    {
+        if (allocated)
+        {
+            system("pause");
+            FreeConsole();
+        }
+    }
+};
+#endif // _WIN32
 
 void check_expectation_failure()
 {
@@ -146,6 +183,10 @@ template <class F, class... Args>
 {
     if (!silent_mode)
     {
+#ifdef _WIN32
+        win32_console console;
+#endif // _WIN32
+
         // For non-silent mode, exceptions except minitest::minitest_assertion_failure will
         // not be handled. This may cause a fast-fail behavior, which is useful for debugging.
         try
@@ -262,6 +303,10 @@ int minitest::pri_impl::run_test(int argc, const char *const *argv)
     {
         if ("--minitest-help"sv == argv[i])
         {
+#ifdef _WIN32
+            win32_console console;
+#endif // _WIN32
+
             cout << format(R"(minitest: {} has {} test case{}.
 Usage:
 --minitest-help
@@ -282,6 +327,9 @@ Usage:
 
         if (!strcmp(argv[i], flag_list_test_cases))
         {
+#ifdef _WIN32
+            win32_console console;
+#endif // _WIN32
             cout << format("minitest: {0} has {1} test case{2}.", filesystem::path(argv[0]).filename().string(),
                         registered_test_cases.size(), registered_test_cases.size() > 1 ? "s" : "")
                  << endl;
@@ -336,9 +384,6 @@ catch (const string &e)
 bool minitest::silent_mode() { return ::silent_mode; }
 
 #ifdef _WIN32
-#include <Windows.h>
-#include <shellapi.h>
-
 int minitest::pri_impl::win32_run_test()
 {
     auto cmd_line = GetCommandLineW();

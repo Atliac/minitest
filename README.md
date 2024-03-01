@@ -14,9 +14,9 @@
 
 Ubuntu g++13, Windows MSVC
 
-![Ubuntu g++13](https://github.com/Atliac/minitest/actions/workflows/Ubuntu.yaml/badge.svg)
+[![.github/workflows/Ubuntu.yaml](https://github.com/Atliac/minitest/actions/workflows/Ubuntu.yaml/badge.svg)](https://github.com/Atliac/minitest/actions/workflows/Ubuntu.yaml)
 
-![Windows MSVC](https://github.com/Atliac/minitest/actions/workflows/Windows.yaml/badge.svg)
+[![.github/workflows/Windows.yaml](https://github.com/Atliac/minitest/actions/workflows/Windows.yaml/badge.svg)](https://github.com/Atliac/minitest/actions/workflows/Windows.yaml)
 
 ## features
 

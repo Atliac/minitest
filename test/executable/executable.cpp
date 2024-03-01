@@ -37,7 +37,7 @@ static auto get_test_case_names()
     const int argc = 2;
     const char *argv[] = {"_", minitest::pri_impl::flag_list_test_cases};
     auto rt = minitest::pri_impl::run_test(argc, argv);
-    auto result=ss.str();
+    auto result = ss.str();
     std::cout.rdbuf(cout_buff);
     ASSERT_TRUE(rt == MINITEST_SUCCESS);
     std::regex re(R"(\d+:(.+)\()");
@@ -219,8 +219,4 @@ TEST_CASE("Failure Test: EXPECT_* (flag_pri_impl_run_nth_test_case)")
     ASSERT_TRUE(rt == MINITEST_FAILURE);
 }
 
-TEST_CASE("minitest::silent_mode()")
-{
-    if (minitest::silent_mode()) { std::cout << "silent mode" << std::endl; }
-    else { std::cout << "not silent mode" << std::endl; }
-}
+TEST_CASE("executable_silent_mode") { EXPECT_TRUE(minitest::silent_mode()); }

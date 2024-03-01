@@ -116,7 +116,6 @@ auto pri_impl_run_nth_test_case(size_t nth_test_case_index)
     }
     auto it = registered_test_cases.begin();
     advance(it, nth_test_case_index);
-    silent_mode = true;
     it->second.test_case_func();
     check_expectation_failure();
 }
@@ -145,6 +144,21 @@ template <class F, class... Args>
     requires requires(F &&f, Args &&...args) { f(forward<Args>(args)...); }
 [[nodiscard]] int run_test_case(F &&f, Args &&...args)
 {
+    if (!silent_mode)
+    {
+        // For non-silent mode, exceptions except minitest::minitest_assertion_failure will
+        // not be handled. This may cause a fast-fail behavior, which is useful for debugging.
+        try
+        {
+            f(forward<Args>(args)...);
+            return MINITEST_SUCCESS;
+        }
+        catch (const minitest::minitest_assertion_failure &)
+        {
+            return MINITEST_FAILURE;
+        }
+    }
+
     try
     {
         f(forward<Args>(args)...);
@@ -280,6 +294,7 @@ Usage:
         }
         else if (!strcmp(argv[i], flag_pri_impl_run_nth_test_case) && i + 1 < argc)
         {
+            ::silent_mode = true;
             return run_test_case(pri_impl_run_nth_test_case, stoul(argv[i + 1]));
         }
         else if (!strcmp(argv[i], flag_run_nth_test_case) && i + 1 < argc)

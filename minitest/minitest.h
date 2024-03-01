@@ -70,6 +70,11 @@ class minitest_do_nothing
 {
 };
 
+#ifdef _WIN32
+// thread-safe
+PRI_IMPL_MINITEST_EXPORT void win32_allocate_console();
+#endif // _WIN32
+
 using test_case_function_type = void (*)();
 
 inline void print_message(std::ostream &) {}
@@ -110,14 +115,23 @@ std::string get_type_name(auto &&o)
 } // namespace pri_impl
 } // namespace minitest
 
+#ifdef _WIN32
+#define PRI_IMPL_WIN32_ALLOCATE_CONSOLE_IN_NON_SILENT_MODE()                            \
+    do {                                                                                \
+        if (!minitest::silent_mode()) { minitest::pri_impl::win32_allocate_console(); } \
+    } while (false)
+#else
+#define PRI_IMPL_WIN32_ALLOCATE_CONSOLE_IN_NON_SILENT_MODE() void(0)
+#endif // _WIN32
+
 #define PRI_IMPL_PRINT_MESSAGE(msg, ...)                                                                        \
     {                                                                                                           \
+        PRI_IMPL_WIN32_ALLOCATE_CONSOLE_IN_NON_SILENT_MODE();                                                   \
         std::osyncstream o(std::cout);                                                                          \
         o << msg << std::endl;                                                                                  \
         __VA_OPT__(o << "Custom message: "; minitest::pri_impl::print_message(o, __VA_ARGS__); o << std::endl;) \
         std::string_view location = __FILE__ ":" PRI_IMPL_MINITEST_STRINGIFY(__LINE__);                         \
-        o << location << std::endl;                                                                             \
-        o << std::format("{:^^{}}", "", location.length()) << std::endl;                                        \
+        o << std::format("{}\n\n", location);                                                                   \
     }
 
 #ifndef MINITEST_CONFIG_DISABLE
@@ -335,10 +349,10 @@ std::string get_type_name(auto &&o)
         }                                                                                                             \
     } while (false)
 
-#define MINITEST_INFO(...)                                                             \
-    do {                                                                               \
-        __VA_OPT__(std::osyncstream o(std::cout); o << "minitest INFO: ";              \
-                   minitest::pri_impl::print_message(o, __VA_ARGS__); o << std::endl;) \
+#define MINITEST_INFO(...)                                                                                       \
+    do {                                                                                                         \
+        PRI_IMPL_WIN32_ALLOCATE_CONSOLE_IN_NON_SILENT_MODE();                                                    \
+        __VA_OPT__(std::osyncstream o(std::cout); minitest::pri_impl::print_message(o, __VA_ARGS__); o << '\n';) \
     } while (false)
 
 #else

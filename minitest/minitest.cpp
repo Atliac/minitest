@@ -23,47 +23,22 @@
 #include <string>
 #ifdef _WIN32
 #include <Windows.h>
+#include <mutex>
 #include <shellapi.h>
 #endif // _WIN32
 
 using namespace std;
 
+#ifdef _WIN32
+#define WIN32_ALLOCATE_CONSOLE() minitest::pri_impl::win32_allocate_console()
+#else
+#define WIN32_ALLOCATE_CONSOLE() void()
+#endif // _WIN32
+
 namespace
 {
 bool expectation_failed = false;
 bool silent_mode = false;
-
-#ifdef _WIN32
-// RAII class for allocating a console for the current win32 GUI application.
-class win32_console
-{
-private:
-    bool allocated = false;
-
-public:
-    win32_console()
-    {
-        // if (AttachConsole(ATTACH_PARENT_PROCESS) || (allocated = AllocConsole()))
-        if (AllocConsole())
-        {
-            allocated = true;
-            FILE* fp;
-            assert(freopen_s(&fp, "CONOUT$", "w", stdout) == 0);
-            assert(freopen_s(&fp, "CONOUT$", "w", stderr) == 0);
-            assert(freopen_s(&fp, "CONIN$", "r", stdin) == 0);
-        }
-    }
-
-    ~win32_console()
-    {
-        if (allocated)
-        {
-            system("pause");
-            FreeConsole();
-        }
-    }
-};
-#endif // _WIN32
 
 void check_expectation_failure()
 {
@@ -183,9 +158,7 @@ template <class F, class... Args>
 {
     if (!silent_mode)
     {
-#ifdef _WIN32
-        win32_console console;
-#endif // _WIN32
+        WIN32_ALLOCATE_CONSOLE();
 
         // For non-silent mode, exceptions except minitest::minitest_assertion_failure will
         // not be handled. This may cause a fast-fail behavior, which is useful for debugging.
@@ -303,9 +276,7 @@ int minitest::pri_impl::run_test(int argc, const char *const *argv)
     {
         if ("--minitest-help"sv == argv[i])
         {
-#ifdef _WIN32
-            win32_console console;
-#endif // _WIN32
+            WIN32_ALLOCATE_CONSOLE();
 
             cout << format(R"(minitest: {} has {} test case{}.
 Usage:
@@ -327,9 +298,7 @@ Usage:
 
         if (!strcmp(argv[i], flag_list_test_cases))
         {
-#ifdef _WIN32
-            win32_console console;
-#endif // _WIN32
+            WIN32_ALLOCATE_CONSOLE();
             cout << format("minitest: {0} has {1} test case{2}.", filesystem::path(argv[0]).filename().string(),
                         registered_test_cases.size(), registered_test_cases.size() > 1 ? "s" : "")
                  << endl;
@@ -405,5 +374,24 @@ int minitest::pri_impl::win32_run_test()
     }
     LocalFree(argv_w);
     return minitest::pri_impl::run_test(argc, argv.get());
+}
+
+void minitest::pri_impl::win32_allocate_console()
+{
+    static mutex console_mutex;
+    lock_guard lock(console_mutex);
+    if (AllocConsole())
+    {
+        FILE *fp;
+        assert(freopen_s(&fp, "CONOUT$", "w", stdout) == 0);
+        assert(freopen_s(&fp, "CONOUT$", "w", stderr) == 0);
+        assert(freopen_s(&fp, "CONIN$", "r", stdin) == 0);
+        assert(0 == atexit(
+                        []
+                        {
+                            system("pause");
+                            FreeConsole();
+                        }));
+    }
 }
 #endif // _WIN32

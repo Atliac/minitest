@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 add_subdirectory("minitest")
 
-option(BUILD_TEST "Build the test" ON)
+set(BUILD_TEST ON CACHE BOOL "Build test")
 
 if(BUILD_TEST)
 include(CTest)

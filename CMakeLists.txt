@@ -14,9 +14,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 add_subdirectory("minitest")
 
-set(BUILD_TEST ON CACHE BOOL "Build test")
+set(BUILD_TESTS ON CACHE BOOL "Build test")
 
-if(BUILD_TEST)
+if(BUILD_TESTS)
 include(CTest)
 endif()
 

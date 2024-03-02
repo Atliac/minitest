@@ -12,9 +12,13 @@ project ("minitest")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-include(CTest)
-
 add_subdirectory("minitest")
+
+option(BUILD_TEST "Build the test" ON)
+
+if(BUILD_TEST)
+include(CTest)
+endif()
 
 if(BUILD_TESTING AND (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME))
 add_subdirectory("test")

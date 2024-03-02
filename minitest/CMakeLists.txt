@@ -14,6 +14,12 @@ if(MSVC)
     target_compile_options(minitest BEFORE PUBLIC /Zc:preprocessor)
 endif(MSVC)
 
+# Install
+install(TARGETS minitest)
+# Install headers
+install(FILES "minitest.h" DESTINATION include)
+
+
 function(minitest_discover_tests target)
     get_target_property(target_type ${target} TYPE)
     target_link_libraries(${target} PRIVATE minitest)

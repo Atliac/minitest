@@ -12,14 +12,15 @@ project ("minitest")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
+option(BUILD_TESTS "Build tests" ON)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+
 add_subdirectory("minitest")
 
-set(BUILD_TESTS ON CACHE BOOL "Build test")
-
 if(BUILD_TESTS)
-include(CTest)
+    include(CTest)
 endif()
 
 if(BUILD_TESTING AND (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME))
-add_subdirectory("test")
+    add_subdirectory("test")
 endif()

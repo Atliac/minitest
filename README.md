@@ -96,7 +96,9 @@ Just copy the [minitest.h](minitest/minitest.h) and [minitest.cpp](minitest/mini
 
 **Note:**
 1. When compiling with MSVC, the `/Zc:preprocessor` option is required.
-1. Build those files into a shared library is required, if one also wants to write test cases in shared libraries, otherwise the test cases can only be written in executables and static libraries. To build a shared library, define the macro `minitest_EXPORTS` before including the header file `minitest.h`.
+1. The minitest library can only be linked to static libraries or executables, if it is built as a static library. If linked to a shared library is required, build the minitest library as a shared library.
+    1. To build the minitest library as a shared library, define the macro `MINITEST_SHARED_LIB` and `minitest_EXPORTS` before including the header file `minitest.h`.
+    1. To use the minitest library as a shared library, define the macro `MINITEST_SHARED_LIB` before including the header file `minitest.h`.
 1. Use the flag `--minitest-pri-impl-run-nth-test-case` to run a test case in [silent mode](#silent-mode). Note, this flag is subject to change.
 
 # Tutorials

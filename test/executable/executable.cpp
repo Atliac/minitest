@@ -81,8 +81,10 @@ TEST_CASE("Assert test cases exist")
     auto test_case_names = get_test_case_names();
     EXPECT_TRUE(test_case_names.contains("static_lib.test_case_1"));
     EXPECT_TRUE(test_case_names.contains("static_lib.test_case_2"));
+#ifdef minitest_SHARED_LIB
     EXPECT_TRUE(test_case_names.contains("shared_lib.test_case_1"));
     EXPECT_TRUE(test_case_names.contains("shared_lib.test_case_2"));
+#endif
 
     EXPECT_TRUE(test_case_names.contains(test_case_name_with_special_chars_1));
     EXPECT_TRUE(test_case_names.contains(test_case_name_with_special_chars_2));

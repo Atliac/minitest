@@ -44,6 +44,24 @@
             }
         },
         {
+            "name": "x64-static-debug",
+            "displayName": "x64 Static Debug",
+            "inherits": "x64-debug",
+            "cacheVariables":
+            {
+                "BUILD_SHARED_LIBS": false
+            }
+        },
+        {
+            "name": "x64-static-release",
+            "displayName": "x64 Static Release",
+            "inherits": "x64-release",
+            "cacheVariables":
+            {
+                "BUILD_SHARED_LIBS": false
+            }
+        },
+        {
             "name": "linux-base",
             "hidden": true,
             "generator": "Ninja",
@@ -74,6 +92,24 @@
             "cacheVariables":
             {
                 "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "linux-static-debug",
+            "displayName": "Linux static debug",
+            "inherits": "linux-debug",
+            "cacheVariables":
+            {
+                "BUILD_SHARED_LIBS": false
+            }
+        },
+        {
+            "name": "linux-static-release",
+            "displayName": "Linux static release",
+            "inherits": "linux-release",
+            "cacheVariables":
+            {
+                "BUILD_SHARED_LIBS": false
             }
         }
     ]

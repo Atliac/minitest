@@ -1,4 +1,4 @@
-﻿add_library(minitest SHARED "minitest.cpp" "minitest.h")
+﻿add_library(minitest "minitest.cpp" "minitest.h")
 add_library(minitest::minitest ALIAS minitest)
 if(WIN32)
 target_compile_definitions(minitest PRIVATE UNICODE _UNICODE) # Unicode
@@ -7,6 +7,10 @@ target_compile_definitions(minitest PRIVATE WIN32_LEAN_AND_MEAN) # Exclude rarel
 target_precompile_headers(minitest PRIVATE <windows.h>)
 endif(WIN32)
 target_precompile_headers(minitest PRIVATE <iostream>)
+
+if(BUILD_SHARED_LIBS)
+    target_compile_definitions(minitest PUBLIC minitest_SHARED_LIB)
+endif(BUILD_SHARED_LIBS)
 
 include(GNUInstallDirs)
 

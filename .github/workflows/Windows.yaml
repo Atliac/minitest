@@ -17,12 +17,35 @@ jobs:
      run: cmake --build build
    - name: Test with CTest
      run: ctest --test-dir build --output-on-failure
+
  Windows_Release:
   runs-on: windows-latest
   steps:
    - uses: actions/checkout@v4.1.1
    - name: Configure with CMake
      run: cmake -B build -G "Visual Studio 17 2022" --preset x64-release
+   - name: Build with CMake
+     run: cmake --build build
+   - name: Test with CTest
+     run: ctest --test-dir build --output-on-failure
+
+ Windows_Static_Debug:
+  runs-on: windows-latest
+  steps:
+   - uses: actions/checkout@v4.1.1
+   - name: Configure with CMake
+     run: cmake -B build -G "Visual Studio 17 2022" --preset x64-static-debug
+   - name: Build with CMake
+     run: cmake --build build
+   - name: Test with CTest
+     run: ctest --test-dir build --output-on-failure
+
+ Windows_Static_Release:
+  runs-on: windows-latest
+  steps:
+   - uses: actions/checkout@v4.1.1
+   - name: Configure with CMake
+     run: cmake -B build -G "Visual Studio 17 2022" --preset x64-static-release
    - name: Build with CMake
      run: cmake --build build
    - name: Test with CTest

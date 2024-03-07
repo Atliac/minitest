@@ -6,5 +6,4 @@ target_compile_definitions(win32_gui PRIVATE WIN32_LEAN_AND_MEAN) # Exclude rare
 
 target_precompile_headers(win32_gui PRIVATE <iostream> <windows.h>)
 
-set_target_properties(minitest PROPERTIES RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:win32_gui>)
 minitest_discover_tests(win32_gui)

@@ -1,5 +1,7 @@
 add_subdirectory(static_lib)
-add_subdirectory(shared_lib)
+if(BUILD_SHARED_LIBS)
+    add_subdirectory(shared_lib)
+endif(BUILD_SHARED_LIBS)
 add_subdirectory(executable)
 if(WIN32)
     add_subdirectory(win32_gui_exe)

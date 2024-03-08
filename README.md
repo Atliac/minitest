@@ -6,13 +6,13 @@
 
 ## Requirements
 
-* C++20
+* Compiler at least: `g++-13, clang++-17, MSVC 16.11` or other compilers that support C++20.
 * CMake(optional, recommended)
 * vcpkg(optional, recommended)
 
 ## Tested platforms
 
-Ubuntu g++13, Windows MSVC
+Ubuntu g++-13, Windows MSVC latest
 
 [![.github/workflows/Ubuntu.yaml](https://github.com/Atliac/minitest/actions/workflows/Ubuntu.yaml/badge.svg)](https://github.com/Atliac/minitest/actions/workflows/Ubuntu.yaml)
 

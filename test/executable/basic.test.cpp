@@ -1,4 +1,4 @@
-#include <minitest.h>
+#include <Atliac/minitest.h>
 
 inline void test_case()
 {

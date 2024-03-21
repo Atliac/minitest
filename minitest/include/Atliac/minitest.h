@@ -26,15 +26,15 @@
 #error The conforming preprocessor is required. Use '/Zc:preprocessor' compiler option to enable it.
 #endif // defined(_WIN32) &&(!defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL)
 
-#if defined(_WIN32) && defined(minitest_SHARED_LIB)
-#ifdef minitest_EXPORTS
+#if defined(_WIN32) && defined(atliac_minitest_SHARED_LIB)
+#ifdef atliac_minitest_EXPORTS
 #define PRI_IMPL_MINITEST_EXPORT __declspec(dllexport)
 #else
 #define PRI_IMPL_MINITEST_EXPORT __declspec(dllimport)
-#endif // minitest_EXPORTS
+#endif // atliac_minitest_EXPORTS
 #else
 #define PRI_IMPL_MINITEST_EXPORT
-#endif // minitest_SHARED_LIB
+#endif // atliac_minitest_SHARED_LIB
 
 #define PRI_IMPL_MINITEST_UNIQ_NAME1(name, id) name##id
 #define PRI_IMPL_MINITEST_UNIQ_NAME(name, id) PRI_IMPL_MINITEST_UNIQ_NAME1(name, id)

@@ -1,5 +1,5 @@
 ﻿add_library(atliac_minitest "minitest.cpp" "include/Atliac/minitest.h")
-add_library(Atliac::minitest ALIAS atliac_minitest)
+add_library(Atliac::atliac_minitest ALIAS atliac_minitest)
 if(WIN32)
 target_compile_definitions(atliac_minitest PRIVATE UNICODE _UNICODE) # Unicode
 target_compile_definitions(atliac_minitest PRIVATE NOMINMAX) # Exclude min/max macros from Windows headers

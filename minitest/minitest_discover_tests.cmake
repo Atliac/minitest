@@ -1,13 +1,13 @@
 function(minitest_discover_tests target)
     get_target_property(target_type ${target} TYPE)
-    get_target_property(minitest_type Atliac::minitest TYPE)
-    # If the Atliac::minitest is a static library, it can only be linked to static libraries or executables.
+    get_target_property(minitest_type Atliac::atliac_minitest TYPE)
+    # If the Atliac::atliac_minitest is a static library, it can only be linked to static libraries or executables.
     if(minitest_type STREQUAL "STATIC_LIBRARY" AND NOT
         (target_type STREQUAL "STATIC_LIBRARY" OR target_type STREQUAL "EXECUTABLE"))
-        message(FATAL_ERROR "Atliac::minitest is a static library and can only be linked to static libraries or executables. The target ${target} is of type ${target_type}, a shared version of Atliac::minitest is required.")
+        message(FATAL_ERROR "Atliac::atliac_minitest is a static library and can only be linked to static libraries or executables. The target ${target} is of type ${target_type}, a shared version of Atliac::atliac_minitest is required.")
     endif()
 
-    target_link_libraries(${target} PRIVATE Atliac::minitest)
+    target_link_libraries(${target} PRIVATE Atliac::atliac_minitest)
 
     if(NOT target_type STREQUAL "EXECUTABLE")
         return()
@@ -16,7 +16,7 @@ function(minitest_discover_tests target)
     if(WIN32 AND minitest_type STREQUAL "SHARED_LIBRARY")
         add_custom_command(TARGET ${target} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                $<TARGET_FILE:Atliac::minitest>
+                $<TARGET_FILE:Atliac::atliac_minitest>
                 $<TARGET_FILE_DIR:${target}>
         )
     endif()

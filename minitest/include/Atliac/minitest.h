@@ -45,6 +45,8 @@
 #define MINITEST_SUCCESS 0
 #define MINITEST_FAILURE 1
 
+inline namespace Atliac
+{
 namespace minitest
 {
 class minitest_assertion_failure : public std::exception
@@ -114,7 +116,7 @@ std::string get_type_name(auto &&o)
 }
 } // namespace pri_impl
 } // namespace minitest
-
+} // namespace Atliac
 #ifdef _WIN32
 #define PRI_IMPL_WIN32_ALLOCATE_CONSOLE_IN_NON_SILENT_MODE()                            \
     do {                                                                                \
@@ -135,7 +137,7 @@ std::string get_type_name(auto &&o)
     }
 
 #ifndef MINITEST_CONFIG_DISABLE
-#define MINITEST_RUN_TEST(argc, argv)                           \
+#define MINITEST_RUN_TESTS(argc, argv)                          \
     do {                                                        \
         try                                                     \
         {                                                       \
@@ -146,13 +148,13 @@ std::string get_type_name(auto &&o)
         }                                                       \
     } while (false)
 #else
-#define MINITEST_RUN_TEST(argc, argv) void(0)
+#define MINITEST_RUN_TESTS(argc, argv) void(0)
 #endif // !MINITEST_CONFIG_DISABLE
 
 #ifdef _WIN32
 #ifndef MINITEST_CONFIG_DISABLE
 #include <Windows.h>
-#define MINITEST_WIN32_RUN_TEST()                               \
+#define MINITEST_WIN32_RUN_TESTS()                              \
     do {                                                        \
         try                                                     \
         {                                                       \
@@ -163,7 +165,7 @@ std::string get_type_name(auto &&o)
         }                                                       \
     } while (false)
 #else
-#define MINITEST_WIN32_RUN_TEST() void(0)
+#define MINITEST_WIN32_RUN_TESTS() void(0)
 #endif // !MINITEST_CONFIG_DISABLE
 #endif // _WIN32
 

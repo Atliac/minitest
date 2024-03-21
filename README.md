@@ -34,7 +34,7 @@ Ubuntu g++-13, Windows MSVC latest
 
 ```cpp
 //#define MINITEST_CONFIG_DISABLE
-#include <minitest.h>
+#include <Atliac/minitest.h>
 
 TEST_CASE("test1")
 {
@@ -56,7 +56,7 @@ TEST_CASE("test1")
 
 int main(int argc, char *argv[])
 {
-    MINITEST_RUN_TEST(argc, argv);
+    MINITEST_RUN_TESTS(argc, argv);
     
     // other non-test code here
     std::cout << "Hello World!\n";
@@ -92,7 +92,7 @@ For the CTest and Visual Studio Test Explorer integration, add `include(CTest)` 
 
 While it is recommended to use CMake, it is also possible to use the **minitest** library in non-CMake projects.
 
-Just copy the [minitest.h](minitest/minitest.h) and [minitest.cpp](minitest/minitest.cpp) files to your project and add them to the build.
+Just copy the [minitest.h](minitest/include/Atliac/minitest.h) and [minitest.cpp](minitest/minitest.cpp) files to your project and add them to the build.
 
 **Note:**
 1. When compiling with MSVC, the `/Zc:preprocessor` option is required.
@@ -209,16 +209,16 @@ Test cases run by *CTest* or *Visual Studio Test Explorer* are in silent mode.
 
 Test cases run directly are in non-silent mode.
 
-## MINITEST_RUN_TEST(argc, argv)
+## MINITEST_RUN_TESTS(argc, argv)
 
-The `MINITEST_RUN_TEST` macro is used to handle test-related command line arguments and run test cases. It can only be used in the `main` function of an executable. It is recommended to put the `MINITEST_RUN_TEST` macro at the beginning of the `main` function.
+The `MINITEST_RUN_TESTS` macro is used to handle test-related command line arguments and run test cases. It can only be used in the `main` function of an executable. It is recommended to put the `MINITEST_RUN_TESTS` macro at the beginning of the `main` function.
 
 Passing the `--minitest-help` flag to the executable will print the help information.
 
 ```cpp
 int main(int argc, char *argv[])
 {
-    MINITEST_RUN_TEST(argc, argv);
+    MINITEST_RUN_TESTS(argc, argv);
     
     // other non-test code here
     std::cout << "Hello World!\n";
@@ -229,15 +229,15 @@ int main(int argc, char *argv[])
 
 While an executable with `minitest` can be run directly, it is recommended to use CTest or Visual Studio Test Explorer to run the tests. `minitest` provides limited options to run the test cases, while CTest and Visual Studio Test Explorer provide more options, such as running multiple test cases in parallel, running a single test case, and running a single test case multiple times.
 
-## MINITEST_WIN32_RUN_TEST()
+## MINITEST_WIN32_RUN_TESTS()
 
-The `MINITEST_WIN32_RUN_TEST` macro can be used in the `WinMain` entry point of a Windows application.
+The `MINITEST_WIN32_RUN_TESTS` macro can be used in the `WinMain` entry point of a Windows application.
 
 ```cpp
 // target.exe
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-    MINITEST_WIN32_RUN_TEST();
+    MINITEST_WIN32_RUN_TESTS();
     
     // other non-test code here
     MessageBoxW(NULL, L"Hello, Windows!", L"Hello", MB_OK);
@@ -245,7 +245,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return 0;
 }
 ```
-This macro is only available on Windows. While it can be used in a console application, it is recommended to use the `MINITEST_RUN_TEST` macro instead.
+This macro is only available on Windows. While it can be used in a console application, it is recommended to use the `MINITEST_RUN_TESTS` macro instead.
 
 ## Compile-time configurations
 
@@ -255,7 +255,7 @@ This macro is only available on Windows. While it can be used in a console appli
 
 Define the macro `MINITEST_CONFIG_DISABLE` to disable the **minitest** library. Much like the macro `NDEBUG`, the macro `MINITEST_CONFIG_DISABLE` disables almost all features of the **minitest** library. The only left is the unused test case function bodies. This should not be a problem because the compiler or linker will optimize them out.
 
-For CMake projects, if the `MINITEST_CONFIG_DISABLE` is used to disable the `MIINITEST_RUN_TEST` or `MINITEST_WIN32_RUN_TEST` macro, or even the whole `minitest` library, the `BUILD_TESTING` option should be set to `OFF` before call the `minitest_discover_tests` function in CMakeLists.txt file to disable the test cases discovery. Failure to do so will cause the target to be run unexpectedly.
+For CMake projects, if the `MINITEST_CONFIG_DISABLE` is used to disable the `MIINITEST_RUN_TEST` or `MINITEST_WIN32_RUN_TESTS` macro, or even the whole `minitest` library, the `BUILD_TESTING` option should be set to `OFF` before call the `minitest_discover_tests` function in CMakeLists.txt file to disable the test cases discovery. Failure to do so will cause the target to be run unexpectedly.
  
 ### MINITEST_CONFIG_NO_SHORT_NAMES
 
@@ -265,7 +265,7 @@ Define the macro `MINITEST_CONFIG_NO_SHORT_NAMES` to remove all macros from `min
 
 The `minitest_discover_tests` is an all-in-one function. It is used to add the `minitest` to any type of target and to discover test cases to configure the [CTest](https://cmake.org/cmake/help/latest/manual/ctest.1.html). Directly call the `target_link_libraries` is not required.`
 
-The test cases are discovered by running the target if the target is an executable. Unexpected behavior would occur if the `main()` function of the target doesn't call the `MINITEST_RUN_TEST` or `MINITEST_WIN32_RUN_TEST` macro. The `minitest_discover_tests` function will not try to discover test cases if the `BUILD_TESTING` option is not set or is set to `OFF`.
+The test cases are discovered by running the target if the target is an executable. Unexpected behavior would occur if the `main()` function of the target doesn't call the `MINITEST_RUN_TESTS` or `MINITEST_WIN32_RUN_TESTS` macro. The `minitest_discover_tests` function will not try to discover test cases if the `BUILD_TESTING` option is not set or is set to `OFF`.
 
 ## Visual Studio IDE integration(optional)
 

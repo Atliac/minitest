@@ -1,10 +1,7 @@
 #pragma once
-#include <minitest.h>
-namespace minitest
-{
+#include <Atliac/minitest.h>
+
 namespace static_lib
 {
 void static_lib_dummy_func();
 } // namespace static_lib
-} // namespace minitest
-

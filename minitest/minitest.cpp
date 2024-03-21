@@ -9,7 +9,7 @@
 // https://github.com/Atliac/minitest/blob/main/README.md
 // ==========================================================================
 
-#include "minitest.h"
+#include <Atliac/minitest.h>
 #include <cassert>
 #include <chrono>
 #include <cstring>

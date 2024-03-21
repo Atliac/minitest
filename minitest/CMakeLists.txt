@@ -1,4 +1,4 @@
-﻿add_library(minitest "minitest.cpp" "minitest.h")
+﻿add_library(minitest "minitest.cpp" "include/Atliac/minitest.h")
 add_library(minitest::minitest ALIAS minitest)
 if(WIN32)
 target_compile_definitions(minitest PRIVATE UNICODE _UNICODE) # Unicode
@@ -15,8 +15,8 @@ endif(BUILD_SHARED_LIBS)
 include(GNUInstallDirs)
 
 target_include_directories(minitest 
-    INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
-    INTERFACE "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include"
+    PUBLIC "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
 if(MSVC)
@@ -29,7 +29,8 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/minitest_discover_tests.cmake)
 # Install
 install(TARGETS minitest EXPORT minitest-targets
 )
-install(FILES "minitest.h" TYPE INCLUDE)
+# Install headers
+install(DIRECTORY "include/Atliac" DESTINATION include)
 install(EXPORT minitest-targets
   FILE minitest-targets.cmake
   NAMESPACE minitest::

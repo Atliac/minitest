@@ -34,17 +34,17 @@ install(DIRECTORY "include/Atliac" DESTINATION include)
 install(EXPORT minitest-targets
   FILE minitest-targets.cmake
   NAMESPACE Atliac::
-  DESTINATION share/minitest
+  DESTINATION share/atliac-minitest
 )
-install(FILES "minitest_discover_tests.cmake" DESTINATION share/minitest)
+install(FILES "minitest_discover_tests.cmake" DESTINATION share/atliac-minitest)
 
 # Packaging
 include(CMakePackageConfigHelpers)
 configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/atliac-minitest-config.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/atliac-minitest-config.cmake
-  INSTALL_DESTINATION share/minitest
+  INSTALL_DESTINATION share/atliac-minitest
   PATH_VARS CMAKE_INSTALL_INCLUDEDIR
 )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/atliac-minitest-config.cmake
-  DESTINATION share/minitest
+  DESTINATION share/atliac-minitest
 )

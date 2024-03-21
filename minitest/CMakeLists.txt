@@ -1,5 +1,5 @@
 ﻿add_library(minitest "minitest.cpp" "include/Atliac/minitest.h")
-add_library(minitest::minitest ALIAS minitest)
+add_library(Atliac::minitest ALIAS minitest)
 if(WIN32)
 target_compile_definitions(minitest PRIVATE UNICODE _UNICODE) # Unicode
 target_compile_definitions(minitest PRIVATE NOMINMAX) # Exclude min/max macros from Windows headers
@@ -15,7 +15,7 @@ endif(BUILD_SHARED_LIBS)
 include(GNUInstallDirs)
 
 target_include_directories(minitest 
-    PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/include"
+    PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
     PUBLIC "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
@@ -33,18 +33,18 @@ install(TARGETS minitest EXPORT minitest-targets
 install(DIRECTORY "include/Atliac" DESTINATION include)
 install(EXPORT minitest-targets
   FILE minitest-targets.cmake
-  NAMESPACE minitest::
+  NAMESPACE Atliac::
   DESTINATION share/minitest
 )
 install(FILES "minitest_discover_tests.cmake" DESTINATION share/minitest)
 
 # Packaging
 include(CMakePackageConfigHelpers)
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/minitest-config.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/minitest-config.cmake
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/atliac-minitest-config.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/atliac-minitest-config.cmake
   INSTALL_DESTINATION share/minitest
   PATH_VARS CMAKE_INSTALL_INCLUDEDIR
 )
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/minitest-config.cmake
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/atliac-minitest-config.cmake
   DESTINATION share/minitest
 )

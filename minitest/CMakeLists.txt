@@ -1,5 +1,5 @@
 ﻿add_library(minitest "minitest.cpp")
-add_library(minitest::minitest ALIAS minitest)
+add_library(Atliac::minitest ALIAS minitest)
 if(WIN32)
 target_compile_definitions(minitest PRIVATE UNICODE _UNICODE) # Unicode
 target_compile_definitions(minitest PRIVATE NOMINMAX) # Exclude min/max macros from Windows headers
@@ -33,7 +33,7 @@ install(TARGETS minitest EXPORT minitest-targets
 install(DIRECTORY "include/Atliac" DESTINATION include)
 install(EXPORT minitest-targets
   FILE minitest-targets.cmake
-  NAMESPACE minitest::
+  NAMESPACE Atliac::
   DESTINATION share/minitest
 )
 install(FILES "minitest_discover_tests.cmake" DESTINATION share/minitest)

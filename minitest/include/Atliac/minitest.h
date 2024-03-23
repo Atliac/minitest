@@ -26,15 +26,15 @@
 #error The conforming preprocessor is required. Use '/Zc:preprocessor' compiler option to enable it.
 #endif // defined(_WIN32) &&(!defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL)
 
-#if defined(_WIN32) && defined(atliac_minitest_SHARED_LIB)
-#ifdef atliac_minitest_EXPORTS
+#if defined(_WIN32) && defined(minitest_SHARED_LIB)
+#ifdef minitest_EXPORTS
 #define PRI_IMPL_MINITEST_EXPORT __declspec(dllexport)
 #else
 #define PRI_IMPL_MINITEST_EXPORT __declspec(dllimport)
-#endif // atliac_minitest_EXPORTS
+#endif // minitest_EXPORTS
 #else
 #define PRI_IMPL_MINITEST_EXPORT
-#endif // atliac_minitest_SHARED_LIB
+#endif // minitest_SHARED_LIB
 
 #define PRI_IMPL_MINITEST_UNIQ_NAME1(name, id) name##id
 #define PRI_IMPL_MINITEST_UNIQ_NAME(name, id) PRI_IMPL_MINITEST_UNIQ_NAME1(name, id)
@@ -45,8 +45,6 @@
 #define MINITEST_SUCCESS 0
 #define MINITEST_FAILURE 1
 
-inline namespace Atliac
-{
 namespace minitest
 {
 class minitest_assertion_failure : public std::exception
@@ -116,7 +114,6 @@ std::string get_type_name(auto &&o)
 }
 } // namespace pri_impl
 } // namespace minitest
-} // namespace Atliac
 #ifdef _WIN32
 #define PRI_IMPL_WIN32_ALLOCATE_CONSOLE_IN_NON_SILENT_MODE()                            \
     do {                                                                                \

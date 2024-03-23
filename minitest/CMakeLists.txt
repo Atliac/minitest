@@ -1,4 +1,4 @@
-﻿add_library(minitest "minitest.cpp" "include/Atliac/minitest.h")
+﻿add_library(minitest "minitest.cpp")
 add_library(minitest::minitest ALIAS minitest)
 if(WIN32)
 target_compile_definitions(minitest PRIVATE UNICODE _UNICODE) # Unicode

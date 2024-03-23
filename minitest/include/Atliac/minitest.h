@@ -45,8 +45,6 @@
 #define MINITEST_SUCCESS 0
 #define MINITEST_FAILURE 1
 
-inline namespace Atliac
-{
 namespace minitest
 {
 class minitest_assertion_failure : public std::exception
@@ -116,7 +114,6 @@ std::string get_type_name(auto &&o)
 }
 } // namespace pri_impl
 } // namespace minitest
-} // namespace Atliac
 #ifdef _WIN32
 #define PRI_IMPL_WIN32_ALLOCATE_CONSOLE_IN_NON_SILENT_MODE()                            \
     do {                                                                                \

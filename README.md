@@ -8,7 +8,7 @@
 
 * Compiler at least: `g++-13, clang++-17, MSVC 16.11` or other compilers that support C++20.
 * CMake(optional, recommended)
-* vcpkg(optional, recommended), [Microsoft/vcpkg#37156](https://github.com/microsoft/vcpkg/pull/37156)
+* vcpkg(optional, recommended)
 
 ## Tested platforms
 
